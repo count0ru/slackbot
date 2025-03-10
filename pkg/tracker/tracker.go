@@ -12,12 +12,17 @@ import (
 	"slackbot/internal/httpclient"
 )
 
-// JiraTracker реализация интерфейса Tracker для Jira.
+type Headers struct {
+	Authorization string
+	ContentType   string
+}
+
 type JiraTracker struct {
 	URL          string
 	Token        string
 	TicketConfig config.TicketConfig
 	Client       httpclient.HTTPClient
+	Headers      Headers
 }
 
 // NewJiraTracker создает новый экземпляр JiraTracker.
@@ -37,6 +42,10 @@ func NewJiraTracker(cfg *config.Config, client httpclient.HTTPClient) (*JiraTrac
 		Token:        cfg.Tracker.Token,
 		TicketConfig: cfg.Ticket,
 		Client:       client,
+		Headers: Headers{
+			Authorization: "Basic " + cfg.Tracker.Token,
+			ContentType:   "application/json",
+		},
 	}, nil
 }
 
@@ -58,12 +67,10 @@ func (t *JiraTracker) CreateTicket(ctx context.Context, title, description strin
 		return "", fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	headers := map[string]string{
-		"Authorization": "Basic " + t.Token,
-		"Content-Type":  "application/json",
-	}
-
-	resp, err := t.Client.Do(ctx, "POST", t.URL, bytes.NewBuffer(jsonPayload), headers)
+	resp, err := t.Client.Do(ctx, "POST", t.URL, bytes.NewBuffer(jsonPayload), map[string]string{
+		"Authorization": t.Headers.Authorization,
+		"Content-Type":  t.Headers.ContentType,
+	})
 	if err != nil {
 		return "", fmt.Errorf("failed to create ticket: %w", err)
 	}
@@ -83,12 +90,10 @@ func (t *JiraTracker) CreateTicket(ctx context.Context, title, description strin
 
 // GetTicketStatus возвращает статус тикета в Jira.
 func (t *JiraTracker) GetTicketStatus(ctx context.Context, key string) (string, error) {
-	headers := map[string]string{
-		"Authorization": "Basic " + t.Token,
-		"Content-Type":  "application/json",
-	}
-
-	resp, err := t.Client.Do(ctx, "GET", fmt.Sprintf("%s/%s", t.URL, key), nil, headers)
+	resp, err := t.Client.Do(ctx, "GET", fmt.Sprintf("%s/%s", t.URL, key), nil, map[string]string{
+		"Authorization": t.Headers.Authorization,
+		"Content-Type":  t.Headers.ContentType,
+	})
 	if err != nil {
 		return "", fmt.Errorf("failed to get ticket status: %w", err)
 	}
