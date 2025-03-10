@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"slackbot/internal/config"
-	"slackbot/internal/db"
 	"slackbot/internal/handlers"
 	"slackbot/internal/httpclient"
 	"slackbot/internal/logger"
@@ -27,13 +26,6 @@ func main() {
 	// Инициализация логгера
 	logger.Init()
 	defer logger.Sync()
-
-	// Инициализация базы данных
-	dbInstance, err := db.NewDB(cfg.Database.Path, logger.Log)
-	if err != nil {
-		logger.Log.Panic("Failed to initialize database", zap.Error(err))
-	}
-	defer dbInstance.Close()
 
 	// Инициализация HTTP-клиента
 	client, err := httpclient.NewClient()
