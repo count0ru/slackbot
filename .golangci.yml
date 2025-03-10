@@ -1,0 +1,25 @@
+run:
+  skip-dirs:
+    - internal/httpclient/mocks
+    - internal/db/mocks
+    - pkg/tracker/mocks
+
+linters:
+  enable:
+    - errcheck
+    - staticcheck
+    - unused
+    - gosimple
+    - govet
+    - ineffassign
+    - typecheck
+    - bodyclose
+    - goconst
+    - gocritic
+    - gofmt
+    - goimports
+    - misspell
+    - prealloc
+    - stylecheck
+    - unconvert
+    - whitespace    
