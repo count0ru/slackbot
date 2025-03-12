@@ -8,9 +8,9 @@ APP_NAME := slackbot
 all: build
 
 fmt:
-	@echo "Formatting Go files (excluding mocks)..."
-	@find . -type f -name '*.go' ! -name '*mocks.go' -exec gofmt -s -w {} \;
-	@find . -type f -name '*.go' ! -name '*mocks.go' -exec goimports -w {} \;
+	@echo "Formatting Go files (excluding mocks and vendor)..."
+	@find . -type f -name '*.go' ! -path "./vendor/*" ! -name '*mocks.go' -exec gofmt -s -w {} \;
+	@find . -type f -name '*.go' ! -path "./vendor/*" ! -name '*mocks.go' -exec goimports -w {} \;
 	@echo "Formatting complete."
 
 # Обновление зависимостей и генерация go.mod
@@ -29,7 +29,7 @@ clean:
 
 # Линтинг всех Go-файлов
 lint:
-	golangci-lint run ./...
+	golangci-lint run --exclude-use-default=true --exclude-rules use-default ./...
 
 # Запуск тестов (кроме functional_tests)
 test:
